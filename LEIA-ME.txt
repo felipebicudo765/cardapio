@@ -1,0 +1,17 @@
+CARDÁPIO AR - COMO USAR
+
+1) TESTAR NO COMPUTADOR
+   Abra a pasta no terminal e rode:  python3 -m http.server 8000
+   Acesse http://localhost:8000 (a câmera/AR só funciona de verdade no celular com HTTPS).
+
+2) COLOCAR NO AR (grátis): Netlify, Vercel ou Cloudflare Pages.
+   Arraste a pasta inteira para o Netlify Drop (app.netlify.com/drop). Você recebe um link https.
+
+3) GERAR O QR CODE: use qualquer gerador (ex.: qr-code-generator.com) com o seu link.
+   Dica: uma URL por mesa, ex.: https://seusite.com/?mesa=1, ?mesa=2 ...
+
+4) TROCAR OS PRATOS: edite a lista PRATOS no index.html (nome, descrição, preço, modelo).
+
+5) MODELOS 3D REAIS: os 4 arquivos em /pratos são exemplos simples. Substitua por modelos reais
+   (.glb) em ESCALA REAL (metros). Escaneie com Polycam, Luma AI ou Kiri Engine, ou modele no Blender.
+   Mantenha cada arquivo abaixo de ~5 MB. No iPhone o USDZ é gerado automaticamente a partir do .glb.

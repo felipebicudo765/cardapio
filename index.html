@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cardápio | Sabor da Casa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<style>
+:root{--bg:#f6f8f4;--card:#fff;--ink:#1c2420;--muted:#5d6b63;--line:#dde4dc;--brand:#1b4332;--accent:#e9a820;--on-brand:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#111a15;--card:#18241d;--ink:#eef3ee;--muted:#9bab9f;--line:#27382d;--brand:#7fcf9f;--accent:#f0b73a;--on-brand:#10231a}}
+*{box-sizing:border-box;margin:0}
+body{font:400 16px/1.5 Figtree,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{padding:28px 20px 14px;max-width:640px;margin:auto}
+h1{font:800 34px/1.05 'Bricolage Grotesque',sans-serif;color:var(--brand)}
+header p{color:var(--muted);margin-top:6px}
+.dica{margin:14px 0 0;padding:10px 14px;border-left:4px solid var(--accent);background:var(--card);border-radius:0 10px 10px 0;font-size:15px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:8px 20px;max-width:640px;margin:auto;position:sticky;top:0;background:var(--bg);z-index:2}
+nav button{flex:none;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:600 15px Figtree,sans-serif;padding:8px 16px;border-radius:99px;cursor:pointer}
+nav button[aria-pressed=true]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+main{max-width:640px;margin:auto;padding:8px 20px 40px;display:grid;gap:12px}
+.prato{display:flex;gap:14px;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer;color:inherit;font:inherit}
+.prato:focus-visible,nav button:focus-visible,.fechar:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.thumb{flex:none;width:76px;height:76px}
+.prato h2{font:600 18px/1.2 'Bricolage Grotesque',sans-serif}
+.prato small{color:var(--muted);display:block;margin:2px 0 6px}
+.preco{font-weight:600;color:var(--brand)}
+dialog{border:0;padding:0;width:min(100%,560px);max-width:100%;margin:auto auto 0;border-radius:22px 22px 0 0;background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.sheet{padding:18px 20px calc(22px + env(safe-area-inset-bottom))}
+.topo{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.topo h3{font:800 26px/1.1 'Bricolage Grotesque',sans-serif;color:var(--brand)}
+.fechar{border:0;background:var(--bg);color:var(--ink);width:40px;height:40px;border-radius:50%;font-size:22px;cursor:pointer}
+model-viewer{width:100%;height:300px;background:var(--bg);border-radius:16px;margin:14px 0;--poster-color:transparent}
+.ar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;background:var(--brand);color:var(--on-brand);font:600 18px Figtree,sans-serif;padding:16px;border-radius:14px;cursor:pointer}
+.meta{display:flex;justify-content:space-between;margin-top:12px;color:var(--muted)}
+.meta b{color:var(--ink);font-size:20px}
+.aviso{margin-top:10px;font-size:14px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sabor da Casa</h1>
+  <p id="mesa">Escolha seu prato e veja o tamanho dele na sua mesa.</p>
+  <p class="dica">Toque em um prato e depois em <b>Ver na minha mesa</b> para ele aparecer em tamanho real pela câmera.</p>
+</header>
+<nav id="cats" aria-label="Categorias"></nav>
+<main id="lista"></main>
+
+<dialog id="det" aria-labelledby="dnome">
+  <div class="sheet">
+    <div class="topo"><h3 id="dnome"></h3><button class="fechar" id="x" aria-label="Fechar">×</button></div>
+    <p id="ddesc" style="margin-top:6px;color:var(--muted)"></p>
+    <model-viewer id="mv" ar ar-modes="scene-viewer quick-look webxr" ar-scale="fixed" ar-placement="floor"
+      camera-controls touch-action="pan-y" shadow-intensity="1" interaction-prompt="none" alt="Modelo 3D do prato">
+      <button slot="ar-button" class="ar">Ver na minha mesa</button>
+    </model-viewer>
+    <div class="meta"><span id="dtam"></span><b id="dpreco"></b></div>
+    <p class="aviso">Aponte a câmera para a mesa e mova o celular devagar até a superfície ser reconhecida. O prato aparece no tamanho real.</p>
+  </div>
+</dialog>
+
+<script>
+// ====== EDITE AQUI O CARDÁPIO ======
+// "modelo": arquivo .glb na pasta /pratos (tamanho real, em metros)
+// "cor": usada só na miniatura da lista
+const PRATOS=[
+ {cat:"Pratos principais",nome:"Feijoada completa",desc:"Feijão preto com carnes selecionadas, arroz, couve, farofa e laranja.",preco:48.9,diam:26,modelo:"pratos/feijoada.glb",cor:"#3a2417"},
+ {cat:"Pratos principais",nome:"Parmegiana de frango",desc:"Filé empanado com molho de tomate e queijo gratinado. Acompanha arroz e batata frita.",preco:42.5,diam:26,modelo:"pratos/parmegiana.glb",cor:"#d9732b"},
+ {cat:"Saladas",nome:"Salada da casa",desc:"Folhas, tomate, cenoura ralada, pepino e molho de ervas.",preco:24.0,diam:26,modelo:"pratos/salada.glb",cor:"#4c9a3a"},
+ {cat:"Sobremesas",nome:"Pudim de leite",desc:"Pudim cremoso com calda de caramelo.",preco:14.0,diam:26,modelo:"pratos/pudim.glb",cor:"#c78a1f"}
+];
+const NOME_RESTAURANTE="Sabor da Casa";
+// ===================================
+const $=s=>document.querySelector(s);
+const brl=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const cats=[...new Set(PRATOS.map(p=>p.cat))];
+let catAtual=cats[0];
+const mesa=new URLSearchParams(location.search).get('mesa');
+if(mesa)$('#mesa').textContent='Mesa '+mesa+'. Escolha seu prato e veja o tamanho dele na sua mesa.';
+
+function renderCats(){
+  $('#cats').innerHTML='';
+  cats.forEach(c=>{const b=document.createElement('button');b.textContent=c;b.setAttribute('aria-pressed',c===catAtual);
+    b.onclick=()=>{catAtual=c;renderCats();renderLista()};$('#cats').append(b)});
+}
+function thumb(cor){return `<svg class="thumb" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="36" fill="#eef1ec" stroke="#cfd7cd"/><circle cx="38" cy="38" r="24" fill="#fff" stroke="#dfe5dd"/><circle cx="38" cy="38" r="15" fill="${cor}"/></svg>`}
+function renderLista(){
+  const l=$('#lista');l.innerHTML='';
+  PRATOS.filter(p=>p.cat===catAtual).forEach(p=>{
+    const b=document.createElement('button');b.className='prato';
+    b.innerHTML=`${thumb(p.cor)}<div><h2>${p.nome}</h2><small>${p.desc}</small><span class="preco">${brl(p.preco)}</span></div>`;
+    b.onclick=()=>abrir(p);l.append(b);
+  });
+}
+function abrir(p){
+  $('#dnome').textContent=p.nome;$('#ddesc').textContent=p.desc;
+  $('#dtam').textContent='Prato de '+p.diam+' cm';$('#dpreco').textContent=brl(p.preco);
+  const mv=$('#mv');mv.alt='Modelo 3D de '+p.nome;mv.src=p.modelo;
+  $('#det').showModal();
+}
+$('#x').onclick=()=>$('#det').close();
+$('#det').addEventListener('click',e=>{if(e.target.id==='det')e.target.close()});
+renderCats();renderLista();
+</script>
+</body>
+</html>
